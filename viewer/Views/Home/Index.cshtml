@@ -1,11 +1,11 @@
 ﻿@{
-    ViewData["Title"] = "Azure Event Grid Viewer";
+    ViewData["Title"] = "Azure Event Grid - CallBackUrl Viewer";
 }
 
 <div>
     <p style="float: left; font-size: 24px;" class="lead">
         <img src="~/images/eventgrid.png" height="47" width="90" alt="Azure Event Grid" />
-        <strong>Azure Event Grid Viewer</strong>
+        <strong>Azure Event Grid - CallBackUrl Viewer</strong>
     </p>
     <p style="float: right;">
         <button class="btn btn-primary btn-xs" id="clear-events">
@@ -19,7 +19,7 @@
 <table id="grid-events" class="table table-striped">
     <thead>
     <th>&nbsp;</th>
-    <th>Event Type</th>
+    <th>Id</th>
     <th>Subject</th>
     </thead>
     <tbody id="grid-event-details"></tbody>

@@ -79,7 +79,7 @@ namespace viewer.Controllers
 
         private async Task<IActionResult> HandleGridEvents(string jsonContent)
         {
-            var model = JsonConvert.DeserializeObject<IEnumerable<TestItemEntityBlobItem>>(jsonContent).FirstOrDefault();
+            var model = JsonConvert.DeserializeObject<TestItemEntityBlobItem>(jsonContent);
 
             await this._hubContext.Clients.All.SendAsync(
                 "gridupdate",

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using viewer.Hubs;
 using viewer.Models;
 using System.Reflection.Metadata;
+using Microsoft.Extensions.Logging;
 
 namespace viewer.Controllers
 {
@@ -20,6 +21,7 @@ namespace viewer.Controllers
     public class UpdatesController : Controller
     {
         #region Data Members
+        private readonly ILogger<UpdatesController> _logger;
 
         private bool EventTypeNotification
             => HttpContext.Request.Headers["aeg-event-type"].FirstOrDefault() ==
@@ -31,9 +33,10 @@ namespace viewer.Controllers
 
         #region Constructors
 
-        public UpdatesController(IHubContext<GridEventsHub> gridEventsHubContext)
+        public UpdatesController(IHubContext<GridEventsHub> gridEventsHubContext, ILogger<UpdatesController> logger)
         {
             this._hubContext = gridEventsHubContext;
+            _logger = logger;
         }
 
         #endregion
@@ -62,11 +65,9 @@ namespace viewer.Controllers
 
             var jsonContent = await reader.ReadToEndAsync();
 
-            var testEntities = JsonConvert.DeserializeObject<TestItemEntityBlobItem>(jsonContent);
 
             if (EventTypeNotification)
             {
-
                 return await HandleGridEvents(jsonContent);
             }
 
@@ -79,17 +80,23 @@ namespace viewer.Controllers
 
         private async Task<IActionResult> HandleGridEvents(string jsonContent)
         {
-            var model = JsonConvert.DeserializeObject<TestItemEntityBlobItem>(jsonContent);
+            try
+            {
+                await this._hubContext.Clients.All.SendAsync(
+                    "gridupdate",
+                    Guid.NewGuid(),
+                    string.Empty,
+                    string.Empty,
+                    DateTime.Now.ToShortDateString(),
+                    jsonContent);
 
-            await this._hubContext.Clients.All.SendAsync(
-                "gridupdate",
-                model.PartitionKey,
-                model.RowKey,
-                model.Message,
-                model.Timestamp.ToLongTimeString(),
-                jsonContent);
-
-            return Ok();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+               _logger.LogError(e.Message);
+               throw;
+            }
         }
 
         #endregion
